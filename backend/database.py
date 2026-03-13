@@ -1,10 +1,13 @@
-import mysql.connector
+import os
+from pymongo import MongoClient
+from dotenv import load_dotenv
 
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="Priya@1234",
-    database="hrms_db"
-)
+load_dotenv()  # .env load karne ke liye
 
-cursor = db.cursor(dictionary=True)
+MONGODB_URI = os.getenv("MONGODB_URI")  # Atlas URI use karo
+
+client = MongoClient(MONGODB_URI)       # Atlas se connect
+db = client["hrms_db"]                  # Database select karo
+
+employee_collection = db["employees"]
+attendance_collection = db["attendance"]

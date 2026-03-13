@@ -1,5 +1,5 @@
-from fastapi import APIRouter
-from database import cursor, db
+from fastapi import APIRouter, HTTPException
+from database import attendance_collection
 from models import Attendance
 
 router = APIRouter()
@@ -7,29 +7,13 @@ router = APIRouter()
 
 @router.post("/attendance")
 def mark_attendance(att: Attendance):
-
-    cursor.execute(
-        "INSERT INTO attendance (employee_id,date,status) VALUES (%s,%s,%s)",
-        (
-            att.employee_id,
-            att.date,
-            att.status
-        )
-    )
-
-    db.commit()
-
+    attendance_collection.insert_one(att.dict())
     return {"message": "Attendance saved"}
 
 
 @router.get("/attendance/{employee_id}")
 def get_attendance(employee_id: str):
-
-    cursor.execute(
-        "SELECT * FROM attendance WHERE employee_id=%s",
-        (employee_id,)
-    )
-
-    records = cursor.fetchall()
-
+    records = list(attendance_collection.find({"employee_id": employee_id}, {"_id": 0}))
+    if not records:
+        raise HTTPException(status_code=404, detail="No attendance records found")
     return records
